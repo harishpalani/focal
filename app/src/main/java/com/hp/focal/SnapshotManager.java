@@ -224,6 +224,7 @@ public class SnapshotManager {
                 SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Bitmap bm = Util.decodeYUV422P(jpegData, s.width, s.height);
+                //: Compression for Samsung HDR (happens before saving!)
                 // TODO: Replace 90 with real JPEG compression level when we'll have that setting
                 bm.compress(Bitmap.CompressFormat.JPEG, 90, baos);
                 jpegData = baos.toByteArray();
@@ -280,8 +281,11 @@ public class SnapshotManager {
                                         0, finalData.length));
 
                                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                                //: Compression (happens before saving!)
                                 mOffscreenGL.getBitmap().compress(Bitmap.CompressFormat.JPEG, 90, baos);
 
+                                //: Add image to ImageSaver to save to phone memory
                                 if (mImageSaver != null) {
                                     mImageSaver.addImage(baos.toByteArray(), uri, title, null,
                                             width, height, correctedOrientation, tagsList, snap);
