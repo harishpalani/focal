@@ -23,9 +23,15 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.database.CursorIndexOutOfBoundsException;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.location.Location;
 import android.media.CamcorderProfile;
@@ -37,6 +43,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.drew.imaging.jpeg.JpegMetadataReader;
 import com.drew.imaging.jpeg.JpegProcessingException;
@@ -46,6 +53,7 @@ import com.drew.metadata.Tag;
 
 import com.hp.focal.feats.AutoPictureEnhancer;
 import com.hp.focal.feats.PixelBuffer;
+import com.hp.focal.figleaf.Figleaf;
 import com.hp.focal.widgets.SimpleToggleWidget;
 
 import java.io.BufferedInputStream;
@@ -54,9 +62,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import com.hp.focal.R;
 
 /**
  * This class manages taking snapshots and videos from Camera
@@ -205,6 +212,9 @@ public class SnapshotManager {
             Log.v(TAG, "onPicture: Got JPEG data");
             mCameraManager.restartPreviewIfNeeded();
 
+            // HP: Makes image negative before it's saved, "encrypting" it [add ENCRYPTION here]
+            // byte[] invertedJPEG = Figleaf.invertJPEG(mContext, jpegData);
+            
             // Calculate the width and the height of the jpeg.
             final Camera.Size s = mCameraManager.getParameters().getPictureSize();
             int orientation = CameraActivity.getCameraMode() == CameraActivity.CAMERA_MODE_PANO ? 0 :
@@ -224,10 +234,12 @@ public class SnapshotManager {
                 SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Bitmap bm = Util.decodeYUV422P(jpegData, s.width, s.height);
+                // Bitmap bm = Util.decodeYUV422P(invertedJPEG, s.width, s.height);
                 //: Compression for Samsung HDR (happens before saving!)
                 // TODO: Replace 90 with real JPEG compression level when we'll have that setting
                 bm.compress(Bitmap.CompressFormat.JPEG, 90, baos);
                 jpegData = baos.toByteArray();
+                // invertedJPEG = baos.toByteArray();
             }
 
             // Store the jpeg on internal memory if needed
@@ -245,6 +257,7 @@ public class SnapshotManager {
 
                 final int correctedOrientation = orientation;
                 final byte[] finalData = jpegData;
+                // final byte[] finalData = invertedJPEG;
 
                 if (!snap.mBypassProcessing && mDoAutoEnhance) {
                     new Thread() {
@@ -372,6 +385,13 @@ public class SnapshotManager {
                 listener.onSnapshotShutter(info);
             }
 
+            // HERE IT IS.
+            /*Drawable drawable = new BitmapDrawable(mContext.getResources(), info.mThumbnail);
+            drawable.setColorFilter(Figleaf.NEGATIVE);
+            Bitmap invertedBitmap = ((BitmapDrawable) drawable).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            invertedBitmap.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+            byte[] jpegData = baos.toByteArray();*/
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             info.mThumbnail.compress(Bitmap.CompressFormat.JPEG, 80, baos);
             byte[] jpegData = baos.toByteArray();
@@ -469,10 +489,16 @@ public class SnapshotManager {
     public void saveImage(Uri uri, String title, int width, int height,
                           int orientation, byte[] jpegData) {
         if (mImageSaver == null) {
-            // ImageSaver can be dead if the user exitted the app.
+            // ImageSaver can be dead if the user exited the app.
             // We restart it temporarily.
             mImageSaver = new ImageSaver();
         }
+
+        // HP: Makes image negative before it's saved, "encrypting" it [add ENCRYPTION here] zyxwv
+        /*byte[] invertedJPEG = Figleaf.invertJPEG(mContext, jpegData);
+
+        mImageSaver.addImage(invertedJPEG, uri, title, null,
+                width, height, orientation);*/
         mImageSaver.addImage(jpegData, uri, title, null,
                 width, height, orientation);
         mImageSaver.waitDone();
@@ -795,7 +821,9 @@ public class SnapshotManager {
                              Location loc, int width, int height, int orientation,
                              List<Tag> exifTags, SnapshotInfo snap) {
             SaveRequest r = new SaveRequest();
-            r.data = data;
+            // r.data = data;
+            // HP: Figleaf image inversion/fake encryption is called here
+            r.data = Figleaf.invertJPEG(mContext, data); // HP: "encrypt" — invert colors of the JPEG
             r.uri = uri;
             r.title = title;
             r.loc = (loc == null) ? null : new Location(loc);  // make a copy

@@ -90,7 +90,14 @@ public class Storage {
     public Uri addImage(ContentResolver resolver, String title,
             long date, Location location, int orientation, byte[] jpeg,
             int width, int height) {
+
+        // HP: Makes image negative before it's saved, "encrypting" it [add ENCRYPTION here]
+        /*byte[] invertedJPEG = Figleaf.invertJPEG(mContext, jpeg);*/
+
         // Save the image.
+        /*String path = writeFile(title, invertedJPEG);
+        return addImage(resolver, title, date, location, orientation,
+                invertedJPEG.length, path, width, height);*/
         String path = writeFile(title, jpeg);
         return addImage(resolver, title, date, location, orientation,
                 jpeg.length, path, width, height);
