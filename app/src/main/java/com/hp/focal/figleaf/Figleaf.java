@@ -3,17 +3,8 @@ package com.hp.focal.figleaf;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.ColorMatrixColorFilter;
-import android.os.Environment;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * @author Harish Palani
@@ -24,7 +15,7 @@ public class Figleaf {
     private static final String TAG = Figleaf.class.getSimpleName();
     private static final int NEG_MASK = 0x00FFFFFF;
 
-    public static byte[] invertJPEG(Context context, byte[] jpegData) { // HP: Makes image negative before it's saved, "encrypting" it [add ENCRYPTION here]
+    public static byte[] invertJPEG(byte[] jpegData) { // HP: Makes image negative before it's saved, "encrypting" it [add ENCRYPTION here]
         Bitmap b = BitmapFactory.decodeByteArray(jpegData, 0, jpegData.length);
         Bitmap invertedBitmap = invert(b);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();

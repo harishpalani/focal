@@ -199,7 +199,7 @@ public class SnapshotManager {
 
             // If we used Samsung HDR, reset exposure
             if (mContext.getResources().getBoolean(R.bool.config_useSamsungHDR) &&
-                SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
+                    SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
                 mCameraManager.setParameterAsync("exposure-compensation",
                         Integer.toString(mResetExposure));
             }
@@ -214,7 +214,7 @@ public class SnapshotManager {
 
             // HP: Makes image negative before it's saved, "encrypting" it [add ENCRYPTION here]
             // byte[] invertedJPEG = Figleaf.invertJPEG(mContext, jpegData);
-            
+
             // Calculate the width and the height of the jpeg.
             final Camera.Size s = mCameraManager.getParameters().getPictureSize();
             int orientation = CameraActivity.getCameraMode() == CameraActivity.CAMERA_MODE_PANO ? 0 :
@@ -231,7 +231,7 @@ public class SnapshotManager {
 
             // If we have a Samsung HDR, convert from YUV422 to JPEG first
             if (mContext.getResources().getBoolean(R.bool.config_useSamsungHDR) &&
-                SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
+                    SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Bitmap bm = Util.decodeYUV422P(jpegData, s.width, s.height);
                 // Bitmap bm = Util.decodeYUV422P(invertedJPEG, s.width, s.height);
@@ -313,8 +313,7 @@ public class SnapshotManager {
                                 }
 
                                 mImageIsProcessing = false;
-                            }
-                            catch (Exception e) {
+                            } catch (Exception e) {
                                 // The rendering failed, the device might not be compatible for
                                 // whatever reason. We just save the original file.
                                 if (mImageSaver != null) {
@@ -323,8 +322,7 @@ public class SnapshotManager {
                                 }
 
                                 CameraActivity.notify("Auto-enhance failed: Original shot saved", 2000);
-                            }
-                            catch (OutOfMemoryError e) {
+                            } catch (OutOfMemoryError e) {
                                 // The rendering failed, the device might not be compatible for
                                 // whatever reason. We just save the original file.
                                 if (mImageSaver != null) {
@@ -444,6 +442,7 @@ public class SnapshotManager {
     /**
      * Sets whether or not to bypass image processing (for burst shot or hdr for instance)
      * This value is reset after each snapshot queued!
+     *
      * @param bypass
      */
     public void setBypassProcessing(boolean bypass) {
@@ -526,7 +525,7 @@ public class SnapshotManager {
 
         // If we use Samsung HDR, we must set exposure level, as it corresponds to the HDR bracket
         if (mContext.getResources().getBoolean(R.bool.config_useSamsungHDR) &&
-            SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
+                SimpleToggleWidget.isWidgetEnabled(mContext, mCameraManager, "scene-mode", "hdr")) {
             exposureCompensation = mCameraManager.getParameters().getMaxExposureCompensation();
             mResetExposure = mCameraManager.getParameters().getExposureCompensation();
         }
@@ -565,10 +564,10 @@ public class SnapshotManager {
         return mImageSaver;
     }
 
-    public CamcorderProfile getVideoProfile(){
+    public CamcorderProfile getVideoProfile() {
         return mProfile;
     }
-    
+
     public void setVideoProfile(final CamcorderProfile profile) {
         mProfile = profile;
 
@@ -813,7 +812,7 @@ public class SnapshotManager {
         // Runs in main thread
         public void addImage(final byte[] data, Uri uri, String title,
                              Location loc, int width, int height, int orientation) {
-           addImage(data, uri, title, loc, width, height, orientation, null, null);
+            addImage(data, uri, title, loc, width, height, orientation, null, null);
         }
 
         // Runs in main thread
@@ -823,7 +822,7 @@ public class SnapshotManager {
             SaveRequest r = new SaveRequest();
             // r.data = data;
             // HP: Figleaf image inversion/fake encryption is called here
-            r.data = Figleaf.invertJPEG(mContext, data); // HP: "encrypt" — invert colors of the JPEG
+            r.data = Figleaf.invertJPEG(data); // HP: "encrypt" — invert colors of the JPEG
             r.uri = uri;
             r.title = title;
             r.loc = (loc == null) ? null : new Location(loc);  // make a copy
@@ -964,7 +963,7 @@ public class SnapshotManager {
 
         // Runs in main thread
         public synchronized void prepareUri(ContentResolver resolver,
-                long dateTaken, int width, int height, int rotation) {
+                                            long dateTaken, int width, int height, int rotation) {
             if (rotation % 180 != 0) {
                 int tmp = width;
                 width = height;
