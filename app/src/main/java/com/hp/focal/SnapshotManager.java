@@ -838,6 +838,7 @@ public class SnapshotManager {
                     } catch (InterruptedException ex) {
                         // ignore.
                     }
+
                 }
                 mQueue.add(r);
                 notifyAll();  // Tell saver thread there is new work to do.
