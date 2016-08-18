@@ -842,7 +842,7 @@ public class SnapshotManager {
                 }
                 mQueue.add(r);
                 notifyAll();  // Tell saver thread there is new work to do.
-            }
+            }   
         }
 
         // Runs in saver thread
